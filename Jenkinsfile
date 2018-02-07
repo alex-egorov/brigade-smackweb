@@ -1,3 +1,16 @@
+
+#!/usr/bin/env groovy
+
+timestamps {
+    def srcVersion = null
+    def publishVersion = null
+    def gitCommit = null
+    def gitBranch = null
+    def latestTag = null
+    def releaseBranches = ['master']
+
+}
+
 podTemplate(label: 'mypod', containers: [
     containerTemplate(name: 'golang', image: 'golang:1.8', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
@@ -31,6 +44,8 @@ podTemplate(label: 'mypod', containers: [
         stage('Build go binaries') {
             container('golang') {
 
+
+               sh "export GOPATH=$HOME"
                sh "go get && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o target/smackweb"
 
                archiveArtifacts artifacts: 'target/*', fingerprint: true
