@@ -12,11 +12,14 @@ podTemplate(label: 'mypod', containers: [
 
         checkout scm
 
+        echo env
+
         echo "Branch name: ${env.BRANCH_NAME}"
         echo "Commit ID: ${env.COMMIT_ID}"
         echo "Build Number: ${env.BUILD_NUMBER}"
 
-        DOCKER_TAG = "${env.BRANCH_NAME}-${enc.COMMIT_ID}"
+        //DOCKER_TAG = "${env.BRANCH_NAME}-${env.COMMIT_ID}"
+        DOCKER_TAG = "develop-testing"
         echo "Docker Tag: $DOCKER_TAG"
 
         stage('Build go binaries') {
