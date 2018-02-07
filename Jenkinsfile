@@ -12,7 +12,8 @@ podTemplate(label: 'mypod', containers: [
 
         checkout scm
 
-        echo env
+        // print environment variables
+        echo sh(script: 'env|sort', returnStdout: true)
 
         echo "Branch name: ${env.BRANCH_NAME}"
         echo "Commit ID: ${env.COMMIT_ID}"
