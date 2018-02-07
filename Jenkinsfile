@@ -1,4 +1,5 @@
 podTemplate(label: 'mypod', containers: [
+    containerTemplate(name: 'golang', image: 'golang:1.9.3-alpine3.7', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.0', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:latest', command: 'cat', ttyEnabled: true)
@@ -10,11 +11,6 @@ podTemplate(label: 'mypod', containers: [
     node('mypod') {
 
         checkout scm
-
-
-        //GIT_BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
-        //GIT_COMMIT=$(git rev-parse --short HEAD)
-        //BUILD_DATE=$(date +"%Y-%m-%d %H-%M-%S")
 
         echo "Branch name: ${env.BRANCH_NAME}"
         echo "Commit ID: ${env.COMMIT_ID}"
@@ -28,7 +24,7 @@ podTemplate(label: 'mypod', containers: [
 
                sh """
                sh "GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o target/smackweb"
-               
+
                archiveArtifacts artifacts: 'target/*', fingerprint: true
             }
         }
@@ -36,27 +32,14 @@ podTemplate(label: 'mypod', containers: [
         stage('Build and push docker image') {
             container('docker') {
 
-                //withCredentials([[$class: 'UsernamePasswordMultiBinding',
-                //        credentialsId: 'dockerhub',
-                //        usernameVariable: 'DOCKER_HUB_USER',
-                //        passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+                    sh """
+                      docker --build-arg IMAGE_TAG_REF=${DOCKER_TAG} \
+                             --build-arg VCS_REF=${env.GIT_COMMIT} \
+                           build -t ${env.DOCKER_HUB_USER}/brigade-smackweb .
+                      """
+                    sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
+                    sh "docker push ${env.DOCKER_HUB_USER}/brigade-smackweb:${DOCKER_TAG} "
 
-                    dir ('.') {
-
-                        docker.withRegistry('https://registry.example.com', 'dockerhub') {
-
-                            def image = docker.build("alex202/smartweb:${DOCKER_TAG}")
-                            image.push()
-                            //image.push('latest')
-
-                            //sh """
-                            //  docker build
-                            //  docker tag ubuntu ${env.DOCKER_HUB_USER}/ubuntu:${env.BUILD_NUMBER}
-                            //  """
-                            //sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
-                            //sh "docker push ${env.DOCKER_HUB_USER}/ubuntu:${env.BUILD_NUMBER} "
-                        }
-                    }
                 }
             }
         }
