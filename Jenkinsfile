@@ -33,12 +33,8 @@ podTemplate(label: 'mypod', containers: [
             gitBranch = sh returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD'
         }
         gitBranch = gitBranch.trim()
-
-        echo "Branch name: $"
-        echo "Commit ID: ${env.COMMIT_ID}"
-        echo "Build Number: ${env.BUILD_NUMBER}"
-
         imageTag = "${gitBranch}-${gitCommit}"
+
         def buildInfo = """# Build info
 BUILD_NUMBER=${env.BUILD_NUMBER}
 BUILD_GIT_COMMIT=${gitCommit}
