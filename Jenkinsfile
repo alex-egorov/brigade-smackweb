@@ -22,7 +22,6 @@ podTemplate(label: 'mypod', containers: [
         stage('Build go binaries') {
             container('golang') {
 
-               sh """
                sh "GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o target/smackweb"
 
                archiveArtifacts artifacts: 'target/*', fingerprint: true
@@ -32,6 +31,11 @@ podTemplate(label: 'mypod', containers: [
         stage('Build and push docker image') {
             container('docker') {
 
+                withCredentials([[$class: 'UsernamePasswordMultiBinding',
+                        credentialsId: 'dockerhub',
+                        usernameVariable: 'DOCKER_HUB_USER',
+                        passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+
                     sh """
                       docker --build-arg IMAGE_TAG_REF=${DOCKER_TAG} \
                              --build-arg VCS_REF=${env.GIT_COMMIT} \
@@ -39,7 +43,6 @@ podTemplate(label: 'mypod', containers: [
                       """
                     sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
                     sh "docker push ${env.DOCKER_HUB_USER}/brigade-smackweb:${DOCKER_TAG} "
-
                 }
             }
         }
@@ -47,8 +50,7 @@ podTemplate(label: 'mypod', containers: [
         stage('do some kubectl work') {
             container('kubectl') {
 
-                    sh "kubectl get nodes --all-namespaces"
-                }
+                sh "kubectl get nodes --all-namespaces"
             }
         }
         stage('do some helm work') {
