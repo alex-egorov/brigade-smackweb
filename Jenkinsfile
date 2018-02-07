@@ -58,7 +58,7 @@ podTemplate(label: 'mypod', containers: [
                       docker build --force-rm \
                             --build-arg IMAGE_TAG_REF=${DOCKER_TAG} \
                             --build-arg VCS_REF=${env.GIT_COMMIT} \
-                            -t ${DOCKER_HUB_USER}/${PROJECT_NAME} .
+                            -t ${DOCKER_HUB_USER}/${PROJECT_NAME}:${DOCKER_TAG} .
                       """
                     sh "docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD} "
                     sh "docker push ${DOCKER_HUB_USER}/${PROJECT_NAME}:${DOCKER_TAG} "
