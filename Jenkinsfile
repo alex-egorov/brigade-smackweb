@@ -24,13 +24,29 @@ podTemplate(label: 'mypod', containers: [
         // print environment variables
         echo sh(script: 'env|sort', returnStdout: true)
 
-        echo "Branch name: ${env.BRANCH_NAME}"
+        gitCommit = sh returnStdout: true, script: 'git rev-parse HEAD'
+        gitCommit = gitCommit.trim()
+        // git branch name is taken from an env var for multi-branch pipeline project, or from git for other projects
+        if (env['BRANCH_NAME']) {
+            gitBranch = BRANCH_NAME
+        } else {
+            gitBranch = sh returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD'
+        }
+        gitBranch = gitBranch.trim()
+
+        echo "Branch name: $"
         echo "Commit ID: ${env.COMMIT_ID}"
         echo "Build Number: ${env.BUILD_NUMBER}"
 
-        //DOCKER_TAG = "${env.BRANCH_NAME}-${env.COMMIT_ID}"
-        DOCKER_TAG = "develop-testing"
-        echo "Docker Tag: $DOCKER_TAG"
+        imageTag = "${gitBranch}-${gitCommit}"
+        def buildInfo = """# Build info
+BUILD_NUMBER=${env.BUILD_NUMBER}
+BUILD_GIT_COMMIT=${gitCommit}
+BUILD_GIT_BRANCH=${gitBranch}
+DOCKER_IMAGE_TAG=${imageTag}
+"""
+
+        echo $buildInfo
 
         stage('Build go binaries') {
             container('golang') {
@@ -56,12 +72,12 @@ podTemplate(label: 'mypod', containers: [
 
                     sh """
                       docker build --force-rm \
-                            --build-arg IMAGE_TAG_REF=${DOCKER_TAG} \
-                            --build-arg VCS_REF=${env.GIT_COMMIT} \
-                            -t ${DOCKER_HUB_USER}/${PROJECT_NAME}:${DOCKER_TAG} .
+                            --build-arg IMAGE_TAG_REF=${imageTag} \
+                            --build-arg VCS_REF=${gitCommit} \
+                            -t ${DOCKER_HUB_USER}/${PROJECT_NAME}:${imageTag} .
                       """
                     sh "docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD} "
-                    sh "docker push ${DOCKER_HUB_USER}/${PROJECT_NAME}:${DOCKER_TAG} "
+                    sh "docker push ${DOCKER_HUB_USER}/${PROJECT_NAME}:${imageTag} "
                 }
             }
         }
@@ -78,7 +94,7 @@ podTemplate(label: 'mypod', containers: [
                 dir("charts") {
 
                     sh "helm ls"
-                    
+
                     sh "helm lint smackweb"
                     sh "helm upgrade -i smackweb smackweb"
                 }
