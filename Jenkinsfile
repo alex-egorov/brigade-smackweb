@@ -7,7 +7,7 @@ podTemplate(label: 'mypod', containers: [
   envVars: [
           envVar(key: '_JAVA_OPTIONS', value: jvmOptions),
           envVar(key: 'BRANCH_NAME', value: env.BRANCH_NAME),
-          envVar(key: ''COMMIT_ID', value: env.COMMIT_ID),
+          envVar(key: 'COMMIT_ID', value: env.COMMIT_ID),
           envVar(key: 'BUILD_NUMBER', value: env.BUILD_NUMBER)
   ],
   volumes: [
