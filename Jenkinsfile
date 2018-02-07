@@ -78,8 +78,9 @@ podTemplate(label: 'mypod', containers: [
                 dir("charts") {
 
                     sh "helm ls"
-                    sh "helm lint smartweb"
-                    sh "helm upgrade -i smartweb smartweb"
+                    
+                    sh "helm lint smackweb"
+                    sh "helm upgrade -i smackweb smackweb"
                 }
             }
         }
