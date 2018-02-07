@@ -32,15 +32,13 @@ podTemplate(label: 'mypod', containers: [
 
         stage('Build go binaries') {
             container('golang') {
-
-
                 sh """
                      mkdir -p /go/src/github.com/alex-egorov
                      ln -s $(pwd) /go/src/github.com/alex-egorov/brigade-smackweb
                      cd /go/src/github.com/alex-egorov/brigade-smackweb && \
                        go get && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o target/smackweb
                 """
-                
+
                archiveArtifacts artifacts: 'target/*', fingerprint: true
             }
         }
