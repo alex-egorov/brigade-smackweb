@@ -1,15 +1,5 @@
 #!/usr/bin/env groovy
 
-timestamps {
-    def srcVersion = null
-    def publishVersion = null
-    def gitCommit = null
-    def gitBranch = null
-    def latestTag = null
-    def releaseBranches = ['master']
-
-}
-
 podTemplate(label: 'mypod', containers: [
     containerTemplate(name: 'golang', image: 'golang:1.8', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
