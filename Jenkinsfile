@@ -1,5 +1,15 @@
 #!/usr/bin/env groovy
 
+    def imageName = "jenkinsci/jnlp-slave-ext"
+    def dockerRegistry = "docker.ecp.eastbanctech.com"
+    def srcVersion = null
+    def publishVersion = null
+    def gitCommit = null
+    def gitBranch = null
+    def imageTag = null
+    def releaseBranches = ['master']
+
+
 PROJECT_NAME = 'brigade-smackweb'
 
 podTemplate(label: 'mypod', containers: [
@@ -9,9 +19,7 @@ podTemplate(label: 'mypod', containers: [
     containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:latest', command: 'cat', ttyEnabled: true)
   ],
   envVars: [
-          envVar(key: 'BRANCH_NAME', value: env.BRANCH_NAME),
-          envVar(key: 'COMMIT_ID', value: env.COMMIT_ID),
-          envVar(key: 'BUILD_NUMBER', value: env.BUILD_NUMBER)
+
   ],
   volumes: [
     hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
