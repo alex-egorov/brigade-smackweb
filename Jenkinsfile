@@ -5,7 +5,6 @@ podTemplate(label: 'mypod', containers: [
     containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:latest', command: 'cat', ttyEnabled: true)
   ],
   envVars: [
-          envVar(key: '_JAVA_OPTIONS', value: jvmOptions),
           envVar(key: 'BRANCH_NAME', value: env.BRANCH_NAME),
           envVar(key: 'COMMIT_ID', value: env.COMMIT_ID),
           envVar(key: 'BUILD_NUMBER', value: env.BUILD_NUMBER)
