@@ -1,5 +1,7 @@
 #!/usr/bin/env groovy
 
+PROJECT_NAME = 'brigade-smackweb'
+
 podTemplate(label: 'mypod', containers: [
     containerTemplate(name: 'golang', image: 'golang:1.8', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
@@ -33,10 +35,12 @@ podTemplate(label: 'mypod', containers: [
         stage('Build go binaries') {
             container('golang') {
 
+                def pwd = pwd()
+
                 sh """
                     mkdir -p /go/src/github.com/alex-egorov
-                    ln -s \$(pwd) /go/src/github.com/alex-egorov/brigade-smackweb
-                    cd /go/src/github.com/alex-egorov/brigade-smackweb
+                    ln -s $pwd /go/src/github.com/alex-egorov/$PROJECT_NAME
+                    cd /go/src/github.com/alex-egorov/$PROJECT_NAME
                     go get && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o target/smackweb
                 """
             }
@@ -54,10 +58,10 @@ podTemplate(label: 'mypod', containers: [
                       docker build --force-rm \
                             --build-arg IMAGE_TAG_REF=${DOCKER_TAG} \
                             --build-arg VCS_REF=${env.GIT_COMMIT} \
-                             -t ${env.DOCKER_HUB_USER}/brigade-smackweb .
+                            -t ${DOCKER_HUB_USER}/${PROJECT_NAME} .
                       """
-                    sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
-                    sh "docker push ${env.DOCKER_HUB_USER}/brigade-smackweb:${DOCKER_TAG} "
+                    sh "docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD} "
+                    sh "docker push ${DOCKER_HUB_USER}/${PROJECT_NAME}:${DOCKER_TAG} "
                 }
             }
         }
