@@ -33,7 +33,9 @@ podTemplate(label: 'mypod', containers: [
         stage('Build go binaries') {
             container('golang') {
 
-
+                sh """
+                    mkdir -p /go/src/github.com/alex-egorov
+                """
             }
         }
 
