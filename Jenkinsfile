@@ -79,7 +79,7 @@ podTemplate(label: 'mypod', containers: [
 
                     sh "helm ls"
                     sh "helm lint smartweb"
-                    sh "helm upgrade --dry-run --debug -i smartweb smartweb"
+                    sh "helm upgrade -i smartweb smartweb"
                 }
             }
         }
