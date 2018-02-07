@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
+	"strings"
 )
 
 type Config struct {
@@ -70,9 +72,26 @@ func createTableCell() string {
 	if len(apiPort) == 0 {
 		apiPort = "8020"
 	}
+
+	//  reqrite code to use http.Request.Client to forwared request headers another request
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
 	url := "http://" + apiService + ":" + apiPort + "/getconfig"
-	log.Printf("%s", url)
-	response, err := http.Get(url)
+	log.Printf("URL: %s", url)
+	req, err := http.NewRequest("GET", url, nil)
+
+	//Iterate over all header fields
+	for k, v := range r.Header {
+		if (strings.HasPrefix( strings.ToLower(k), "ver_")) {
+			//req.Header.Add(k, strings.Join(v, ""))
+			req.Header.Add(k, v[0])
+		}
+	}
+
+	response, err := client.Do(req)
+
 	if err != nil {
 		log.Fatal(err)
 	}
