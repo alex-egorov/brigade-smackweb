@@ -51,7 +51,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "<tr>")
 		j := 1
 		for j <= 5 {
-			fmt.Fprintf(w, createTableCell())
+			fmt.Fprintf(w, createTableCell(r))
 			j = j + 1
 		}
 		fmt.Fprintf(w, "</tr>")
@@ -62,7 +62,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "</table></body></html>")
 }
 
-func createTableCell() string {
+func createTableCell(r *http.Request) string {
 	// call api for backend config values
 	var apiService = os.Getenv("API_SERVICE")
 	if len(apiService) == 0 {
