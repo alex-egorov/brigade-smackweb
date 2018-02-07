@@ -34,9 +34,13 @@ podTemplate(label: 'mypod', containers: [
             container('golang') {
 
 
-               sh "export GOPATH=$HOME"
-               sh "go get && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o target/smackweb"
-
+                sh """
+                     mkdir -p /go/src/github.com/alex-egorov
+                     ln -s $(pwd) /go/src/github.com/alex-egorov/brigade-smackweb
+                     cd /go/src/github.com/alex-egorov/brigade-smackweb && \
+                       go get && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o target/smackweb
+                """
+                
                archiveArtifacts artifacts: 'target/*', fingerprint: true
             }
         }
@@ -50,9 +54,10 @@ podTemplate(label: 'mypod', containers: [
                         passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
 
                     sh """
-                      docker --build-arg IMAGE_TAG_REF=${DOCKER_TAG} \
-                             --build-arg VCS_REF=${env.GIT_COMMIT} \
-                           build -t ${env.DOCKER_HUB_USER}/brigade-smackweb .
+                      docker build --force-rm \
+                            --build-arg IMAGE_TAG_REF=${DOCKER_TAG} \
+                            --build-arg VCS_REF=${env.GIT_COMMIT} \
+                             -t ${env.DOCKER_HUB_USER}/brigade-smackweb .
                       """
                     sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
                     sh "docker push ${env.DOCKER_HUB_USER}/brigade-smackweb:${DOCKER_TAG} "
