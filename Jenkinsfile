@@ -53,7 +53,7 @@ BUILD_GIT_BRANCH=${gitBranch}
 DOCKER_IMAGE_TAG=${imageTag}
 """
 
-        echo $buildInfo
+        echo buildInfo
 
         stage('Build go binaries') {
             container('golang') {
