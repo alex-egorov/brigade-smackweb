@@ -30,20 +30,29 @@ podTemplate(label: 'mypod', containers: [
         // print environment variables
         echo sh(script: 'env|sort', returnStdout: true)
 
-        def gitCommit = sh returnStdout: true, script: 'git rev-parse HEAD'
+        //def gitCommit = sh returnStdout: true, script: 'git rev-parse --short HEAD'
+        sh "git rev-parse --short HEAD > .git/commit-id"
+        def gitCommit = readFile('.git/commit-id').trim()
         echo gitCommit
-        def aaagitCommit = gitCommit.trim()
+
         // git branch name is taken from an env var for multi-branch pipeline project, or from git for other projects
         if (env['BRANCH_NAME']) {
             gitBranch = BRANCH_NAME
         } else {
-            gitBranch = sh returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD'
+            sh "git rev-parse --abbrev-ref HEAD > .git/branch-name"
+            def gitBranch = readFile('.git/branch-name').trim()
+            //gitBranch = sh returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD'
         }
-        gitBranch = gitBranch.trim()
-        imageTag = "${gitBranch}-${gitCommit}"
+        //gitBranch = gitBranch.trim()
+        def imageTag = "${gitBranch}-${gitCommit}"
+
+        sh "date +'%Y-%m-%d %H-%M-%S' > .git/build-date"
+        def buildDate = readFile('.git/build-date').trim()
+        //buildDate = sh returnStdout: true, script: ''
 
         def buildInfo = """# Build info
 BUILD_NUMBER=${env.BUILD_NUMBER}
+BUILD_DATE=${buildDate}
 BUILD_GIT_COMMIT=${gitCommit}
 BUILD_GIT_BRANCH=${gitBranch}
 DOCKER_IMAGE_TAG=${imageTag}
