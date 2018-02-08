@@ -71,7 +71,7 @@ func createTableCell() string {
 		apiPort = "8020"
 	}
 	url := "http://" + apiService + ":" + apiPort + "/getconfig"
-	log.Printf("%s", url)
+	log.Printf("URL ***: %s", url)
 	response, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
