@@ -1,13 +1,11 @@
 #!/usr/bin/env groovy
 
-    def imageName = "jenkinsci/jnlp-slave-ext"
-    def dockerRegistry = "docker.ecp.eastbanctech.com"
-    def srcVersion = null
-    def publishVersion = null
-    def gitCommit = null
-    def gitBranch = null
-    def imageTag = null
-    def releaseBranches = ['master']
+def imageName = "jenkinsci/jnlp-slave-ext"
+def dockerRegistry = "docker.ecp.eastbanctech.com"
+
+//def gitCommit = null
+//def gitBranch = null
+//def imageTag = null
 
 
 PROJECT_NAME = 'brigade-smackweb'
@@ -32,7 +30,7 @@ podTemplate(label: 'mypod', containers: [
         // print environment variables
         echo sh(script: 'env|sort', returnStdout: true)
 
-        gitCommit = sh returnStdout: true, script: 'git rev-parse HEAD'
+        def gitCommit = sh returnStdout: true, script: 'git rev-parse HEAD'
         gitCommit = gitCommit.trim()
         // git branch name is taken from an env var for multi-branch pipeline project, or from git for other projects
         if (env['BRANCH_NAME']) {
