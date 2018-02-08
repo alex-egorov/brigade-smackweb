@@ -31,7 +31,8 @@ podTemplate(label: 'mypod', containers: [
         echo sh(script: 'env|sort', returnStdout: true)
 
         def gitCommit = sh returnStdout: true, script: 'git rev-parse HEAD'
-        gitCommit = gitCommit.trim()
+        echo gitCommit
+        def aaagitCommit = gitCommit.trim()
         // git branch name is taken from an env var for multi-branch pipeline project, or from git for other projects
         if (env['BRANCH_NAME']) {
             gitBranch = BRANCH_NAME
