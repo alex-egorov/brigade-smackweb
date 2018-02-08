@@ -62,8 +62,8 @@ DOCKER_IMAGE_TAG=${imageTag}
 
                 sh """
                     mkdir -p /go/src/github.com
-                    ln -s $pwd /go/src/github.com/$imageName
-                    cd /go/src/github.com/$imageName
+                    ln -s $pwd /go/src/github.com
+                    cd /go/src/github.com/smackweb
                     go get && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o target/smackweb
                 """
             }
