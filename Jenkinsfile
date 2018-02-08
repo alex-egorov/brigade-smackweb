@@ -1,14 +1,11 @@
 #!/usr/bin/env groovy
 
-def imageName = "jenkinsci/jnlp-slave-ext"
-def dockerRegistry = "docker.ecp.eastbanctech.com"
+def imageName = "alex202/brigade-smackweb"
 
-//def gitCommit = null
-//def gitBranch = null
-//def imageTag = null
-
-
-PROJECT_NAME = 'brigade-smackweb'
+def gitCommit = null
+def gitBranch = null
+def imageTag = null
+def buildDate = null
 
 podTemplate(label: 'mypod', containers: [
     containerTemplate(name: 'golang', image: 'golang:1.8', ttyEnabled: true, command: 'cat'),
@@ -30,25 +27,23 @@ podTemplate(label: 'mypod', containers: [
         // print environment variables
         echo sh(script: 'env|sort', returnStdout: true)
 
-        //def gitCommit = sh returnStdout: true, script: 'git rev-parse --short HEAD'
         sh "git rev-parse --short HEAD > .git/commit-id"
-        def gitCommit = readFile('.git/commit-id').trim()
-        echo gitCommit
+        gitCommit = readFile('.git/commit-id').trim()
 
         // git branch name is taken from an env var for multi-branch pipeline project, or from git for other projects
         if (env['BRANCH_NAME']) {
             gitBranch = BRANCH_NAME
         } else {
             sh "git rev-parse --abbrev-ref HEAD > .git/branch-name"
-            def gitBranch = readFile('.git/branch-name').trim()
-            //gitBranch = sh returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD'
+            gitBranch = readFile('.git/branch-name').trim()
+
         }
-        //gitBranch = gitBranch.trim()
-        def imageTag = "${gitBranch}-${gitCommit}"
+
+        imageTag = "${gitBranch}-${gitCommit}"
 
         sh "date +'%Y-%m-%d %H-%M-%S' > .git/build-date"
-        def buildDate = readFile('.git/build-date').trim()
-        //buildDate = sh returnStdout: true, script: ''
+        buildDate = readFile('.git/build-date').trim()
+
 
         def buildInfo = """# Build info
 BUILD_NUMBER=${env.BUILD_NUMBER}
@@ -66,9 +61,9 @@ DOCKER_IMAGE_TAG=${imageTag}
                 def pwd = pwd()
 
                 sh """
-                    mkdir -p /go/src/github.com/alex-egorov
-                    ln -s $pwd /go/src/github.com/alex-egorov/$PROJECT_NAME
-                    cd /go/src/github.com/alex-egorov/$PROJECT_NAME
+                    mkdir -p /go/src/github.com
+                    ln -s $pwd /go/src/github.com/$imageName
+                    cd /go/src/github.com/$imageName
                     go get && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o target/smackweb
                 """
             }
@@ -84,12 +79,13 @@ DOCKER_IMAGE_TAG=${imageTag}
 
                     sh """
                       docker build --force-rm \
+                            --build-arg BUILD_DATE="${buildDate}" \
                             --build-arg IMAGE_TAG_REF=${imageTag} \
                             --build-arg VCS_REF=${gitCommit} \
-                            -t ${DOCKER_HUB_USER}/${PROJECT_NAME}:${imageTag} .
+                            -t ${imageName}:${imageTag} .
                       """
                     sh "docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD} "
-                    sh "docker push ${DOCKER_HUB_USER}/${PROJECT_NAME}:${imageTag} "
+                    sh "docker push ${imageName}:${imageTag} "
                 }
             }
         }
