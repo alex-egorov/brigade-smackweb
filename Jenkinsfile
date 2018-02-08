@@ -104,7 +104,12 @@ DOCKER_IMAGE_TAG=${imageTag}
                     sh "helm ls"
 
                     sh "helm lint smackweb"
-                    sh "helm upgrade -i smackweb smackweb"
+                    sh """
+                        helm upgrade -i smackweb \
+                            --set api.host=smackapi-smackapi --set api.port=80 \
+                            --set service.type=LoadBalancer --set service.externalPort=80 \
+                        smackweb
+                     """
                 }
             }
         }
