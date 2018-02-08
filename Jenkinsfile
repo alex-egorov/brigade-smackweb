@@ -108,6 +108,7 @@ DOCKER_IMAGE_TAG=${imageTag}
                         helm upgrade -i smackweb \
                             --set api.host=smackapi-smackapi --set api.port=80 \
                             --set service.type=LoadBalancer --set service.externalPort=80 \
+                            --set image.tag=${imageTag} \
                         smackweb
                      """
                 }
